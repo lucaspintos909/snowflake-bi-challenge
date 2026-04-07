@@ -4,35 +4,36 @@ from pathlib import Path
 
 
 def test_load_raw_creates_stage_and_copies(tmp_path):
-    # Create a minimal fake CSV
     csv = tmp_path / "test.csv"
-    csv.write_text(
-        "Id persona,Sexo,Rol,Departamento,Subsistema,Ciclo,Grado,Zona,Contexto,"
-        "Año lectivo,Cantidad de días ingreso a CREA,Cantidad de entregas de tareas en CREA,"
-        "Cantidad de Comentarios posteados en CREA,Cantidad de Acciones totales en CREA,"
-        "Cantidad de días de ingreso a Matific,Cantidad de episodios finalizados en Matific,"
-        "Cantidad de días de ingreso a Biblioteca,Cantidad de préstamos en Biblioteca\n"
-        "1,Femenino,Estudiante,Montevideo,DGEIP,Primaria,4,Urbana,Quintil Urbano 1,2025,"
-        "10,2,5,30,0.0,0.0,0,0\n"
-    )
+    csv.write_text("col1;col2\nval1;val2\n")
 
     session = MagicMock()
     session.file.put.return_value = [MagicMock(status="UPLOADED")]
     session.table.return_value.count.return_value = 1
 
-    from ingestion.load_raw import load_raw
-    count = load_raw(session, csv_path=csv)
+    from utils.config import PipelineConfig
+    config = PipelineConfig(
+        year=2024,
+        csv_path=csv,
+        csv_delimiter=";",
+        csv_columns=["COL1", "COL2"],
+        database="CEIBAL_DB",
+        raw_schema="RAW",
+        mart_schema="MART",
+        stage="RAW_STAGE",
+    )
 
-    # Stage was created
+    from ingestion.load_raw import load_raw
+    count = load_raw(session, config)
+
     sql_calls = [str(c) for c in session.sql.call_args_list]
     assert any("CREATE SCHEMA IF NOT EXISTS CEIBAL_DB.RAW" in c for c in sql_calls)
     assert any("CREATE SCHEMA IF NOT EXISTS CEIBAL_DB.MART" in c for c in sql_calls)
     assert any("CREATE OR REPLACE STAGE" in c for c in sql_calls)
+    assert any("CREATE TABLE IF NOT EXISTS" in c for c in sql_calls)
     assert any("COPY INTO" in c for c in sql_calls)
-
-    # File was uploaded
+    assert any("ACTIVIDAD_ESTUDIANTES_2024" in c for c in sql_calls)
     session.file.put.assert_called_once()
-
     assert count == 1
 
 
