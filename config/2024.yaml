@@ -1,0 +1,32 @@
+# config/2024.yaml
+year: 2024
+csv:
+  path: actividad-de-estudiantes-2024.csv
+  delimiter: ";"
+  columns:
+    - ID_PERSONA
+    - SEXO
+    - ROL
+    - DEPARTAMENTO
+    - SUBSISTEMA
+    - CICLO
+    - GRADO
+    - ZONA
+    - CONTEXTO
+    - ANIO_LECTIVO
+    - CREA_DIAS_INGRESO
+    - CREA_ENTREGAS_TAREAS
+    - CREA_COMENTARIOS
+    - CREA_ACCIONES_TOTALES
+    - MATIFIC_DIAS_INGRESO
+    - MATIFIC_EPISODIOS
+    - PAM_DIAS_INGRESO
+    - PAM_ACTIVIDADES
+    - BIBLIOTECA_DIAS_INGRESO
+    - BIBLIOTECA_PRESTAMOS
+
+snowflake:
+  database: CEIBAL_DB
+  raw_schema: RAW
+  mart_schema: MART
+  stage: RAW_STAGE
