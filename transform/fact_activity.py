@@ -3,20 +3,20 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from snowflake.snowpark import Session
+    from utils.config import PipelineConfig
 
 
-def build_fact_actividad(session: Session) -> None:
+def build_fact_actividad(session: Session, config: PipelineConfig) -> None:
     from snowflake.snowpark import functions as F
 
-    raw = session.table("RAW.ACTIVIDAD_ESTUDIANTES")
-    dim_est = session.table("MART.DIM_ESTUDIANTE")
-    dim_tiempo = session.table("MART.DIM_TIEMPO")
-    dim_geo = session.table("MART.DIM_GEOGRAFIA")
-    dim_ctx = session.table("MART.DIM_CONTEXTO")
+    raw = session.table(f"{config.raw_schema}.{config.raw_table}")
+    dim_est = session.table(f"{config.mart_schema}.DIM_ESTUDIANTE")
+    dim_tiempo = session.table(f"{config.mart_schema}.DIM_TIEMPO")
+    dim_geo = session.table(f"{config.mart_schema}.DIM_GEOGRAFIA")
+    dim_ctx = session.table(f"{config.mart_schema}.DIM_CONTEXTO")
 
     staged = raw.select(
         "ID_PERSONA",
-        "SEXO",
         "DEPARTAMENTO",
         "ZONA",
         "SUBSISTEMA",
@@ -36,42 +36,32 @@ def build_fact_actividad(session: Session) -> None:
 
     fact = (
         staged
-        .join(
-            dim_est.select("SK_ESTUDIANTE", "ID_PERSONA"),
-            on="ID_PERSONA",
-            how="left",
-        )
-        .join(
-            dim_tiempo.select("SK_TIEMPO", "ANIO_LECTIVO"),
-            on="ANIO_LECTIVO",
-            how="left",
-        )
-        .join(
-            dim_geo.select("SK_GEOGRAFIA", "DEPARTAMENTO", "ZONA"),
-            on=["DEPARTAMENTO", "ZONA"],
-            how="left",
-        )
+        .join(dim_est.select("SK_ESTUDIANTE", "ID_PERSONA"), on="ID_PERSONA", how="left")
+        .join(dim_tiempo.select("SK_TIEMPO", "ANIO_LECTIVO"), on="ANIO_LECTIVO", how="left")
+        .join(dim_geo.select("SK_GEOGRAFIA", "DEPARTAMENTO", "ZONA"), on=["DEPARTAMENTO", "ZONA"], how="left")
         .join(
             dim_ctx.select("SK_CONTEXTO", "SUBSISTEMA", "CICLO", "GRADO", "CONTEXTO"),
             on=["SUBSISTEMA", "CICLO", "GRADO", "CONTEXTO"],
             how="left",
         )
         .select(
-            "SK_ESTUDIANTE",
-            "SK_TIEMPO",
-            "SK_GEOGRAFIA",
-            "SK_CONTEXTO",
-            "CREA_DIAS_INGRESO",
-            "CREA_ENTREGAS_TAREAS",
-            "CREA_COMENTARIOS",
-            "CREA_ACCIONES_TOTALES",
-            "MATIFIC_DIAS_INGRESO",
-            "MATIFIC_EPISODIOS",
-            "BIBLIOTECA_DIAS_INGRESO",
-            "BIBLIOTECA_PRESTAMOS",
+            "SK_ESTUDIANTE", "SK_TIEMPO", "SK_GEOGRAFIA", "SK_CONTEXTO",
+            "CREA_DIAS_INGRESO", "CREA_ENTREGAS_TAREAS", "CREA_COMENTARIOS", "CREA_ACCIONES_TOTALES",
+            "MATIFIC_DIAS_INGRESO", "MATIFIC_EPISODIOS",
+            "BIBLIOTECA_DIAS_INGRESO", "BIBLIOTECA_PRESTAMOS",
         )
     )
 
+    fact_fqn = f"{config.mart_schema}.FACT_ACTIVIDAD"
+
+    session.sql(f"""
+        DELETE FROM {fact_fqn}
+        WHERE SK_TIEMPO IN (
+            SELECT SK_TIEMPO FROM {config.mart_schema}.DIM_TIEMPO
+            WHERE ANIO_LECTIVO = {config.year}
+        )
+    """).collect()
+
     count = fact.count()
-    fact.write.save_as_table("MART.FACT_ACTIVIDAD", mode="overwrite")
-    print(f"FACT_ACTIVIDAD: {count:,} filas")
+    fact.write.save_as_table(fact_fqn, mode="append")
+    print(f"FACT_ACTIVIDAD: {count:,} filas ({config.year})")
