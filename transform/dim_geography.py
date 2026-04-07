@@ -14,6 +14,8 @@ def build_dim_geografia(session: Session, config: PipelineConfig) -> None:
     candidates = (
         raw
         .select("DEPARTAMENTO", "ZONA")
+        .with_column("ZONA", F.when(F.col("ZONA") == "Sin Datos", F.lit("Sin Dato")).otherwise(F.col("ZONA")))
+        .with_column("DEPARTAMENTO", F.when(F.col("DEPARTAMENTO") == "Sin Datos", F.lit("Sin Dato")).otherwise(F.col("DEPARTAMENTO")))
         .distinct()
     )
 
