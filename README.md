@@ -1,6 +1,6 @@
 # snowflake-bi-challenge
 
-ELT pipeline — Evaluación técnica BI Analista desarrollador, Plan Ceibal (Uruguay).
+ELT pipeline — Evaluación técnica BI Analista desarrollador, Ceibal (Uruguay).
 
 Ingesta el dataset público de actividad de estudiantes en plataformas educativas (CREA, Matific, Biblioteca País) y lo transforma en un star schema en Snowflake usando Python y Snowpark.
 
@@ -23,18 +23,11 @@ Datos públicos: [catalogodatos.gub.uy](https://catalogodatos.gub.uy/dataset/cen
 
 **Métricas disponibles:** días de ingreso, entregas, comentarios y acciones en CREA; días y episodios en Matific; días y préstamos en Biblioteca País.
 
----
-
-## Decisiones de diseño
-
-**¿Por qué Star Schema?**
+**Por qué esquema estrella?**
 Permite filtrar por cualquier dimensión y agregar métricas en una query simple con JOINs predecibles. Snowflake optimiza bien los JOINs entre una fact table grande y dimensiones pequeñas.
 
-**¿Por qué una capa RAW?**
-Preserva el dato original intacto (todo VARCHAR, copia fiel del CSV). Las transformaciones de tipos y limpieza ocurren en Snowpark al construir MART, sin destruir la fuente.
-
-**¿Por qué Snowpark en lugar de SQL directo?**
-La lógica de transformación queda en Python: tipada, testeable y versionada en git. La ejecución sigue siendo en Snowflake — Snowpark traduce los DataFrames a SQL internamente.
+**Por qué una capa RAW?**
+Para dejar el dato original intacto (todo VARCHAR, copia fiel del CSV). Las transformaciones de tipos y limpieza ocurren en Snowpark al construir MART, sin destruir la fuente.
 
 ---
 
@@ -67,12 +60,4 @@ Descargar el CSV y ubicarlo en la raíz del proyecto:
 python main.py                 # pipeline completo (ingesta + transformaciones)
 python main.py --ingest-only   # solo carga el CSV a RAW
 python main.py --transform-only # solo construye el modelo en MART
-```
-
----
-
-## Tests
-
-```bash
-pytest tests/
 ```
