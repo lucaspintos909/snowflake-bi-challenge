@@ -49,15 +49,33 @@ SNOWFLAKE_WAREHOUSE=
 SNOWFLAKE_ROLE=
 ```
 
+### Configuración del pipeline
+
+Los nombres de tablas, schemas, stage y ruta del CSV se configuran en `pipeline_config.yaml`:
+
+```yaml
+csv:
+  path: actividad-de-estudiantes-2025.csv  # ruta al CSV (relativa al directorio raíz)
+
+snowflake:
+  database: CEIBAL_DB
+  raw_schema: RAW
+  mart_schema: MART
+  stage: RAW_STAGE
+  raw_table: ACTIVIDAD_ESTUDIANTES
+```
+
+Modificar este archivo para apuntar a otro CSV o usar nombres de objetos distintos en Snowflake. Las credenciales siguen en `.env` y nunca se commitean.
+
 ---
 
 ## Correr el pipeline
 
-Descargar el CSV y ubicarlo en la raíz del proyecto:
+Descargar el CSV y ubicarlo en la raíz del proyecto (o actualizar `csv.path` en `config/pipeline.yaml`):
 [actividad-de-estudiantes-2025.csv](https://catalogodatos.gub.uy/dataset/caf9f327-4446-4326-a6c2-450cfacf8446/resource/eb7ab748-4b66-41ab-9145-6ce0ef8ba2cb/download/actividad-de-estudiantes-2025.csv)
 
 ```bash
-python main.py                 # pipeline completo (ingesta + transformaciones)
-python main.py --ingest-only   # solo carga el CSV a RAW
+python main.py                  # pipeline completo (ingesta + transformaciones)
+python main.py --ingest-only    # solo carga el CSV a RAW
 python main.py --transform-only # solo construye el modelo en MART
 ```

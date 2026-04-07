@@ -1,18 +1,20 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from snowflake.snowpark import Session
+    from utils.config import PipelineConfig
 
 
-def build_fact_actividad(session: Session) -> None:
+def build_fact_actividad(session: Session, config: PipelineConfig) -> None:
     from snowflake.snowpark import functions as F
 
-    raw = session.table("RAW.ACTIVIDAD_ESTUDIANTES")
-    dim_est = session.table("MART.DIM_ESTUDIANTE")
-    dim_tiempo = session.table("MART.DIM_TIEMPO")
-    dim_geo = session.table("MART.DIM_GEOGRAFICA")
-    dim_ctx = session.table("MART.DIM_CONTEXTO")
+    raw = session.table(config.raw_table_ref)
+    dim_est = session.table(config.mart_table("DIM_ESTUDIANTE"))
+    dim_tiempo = session.table(config.mart_table("DIM_TIEMPO"))
+    dim_geo = session.table(config.mart_table("DIM_GEOGRAFICA"))
+    dim_ctx = session.table(config.mart_table("DIM_CONTEXTO"))
 
     staged = raw.select(
         "ID_PERSONA",
@@ -73,5 +75,5 @@ def build_fact_actividad(session: Session) -> None:
     )
 
     count = fact.count()
-    fact.write.save_as_table("MART.FACT_ACTIVIDAD", mode="overwrite")
+    fact.write.save_as_table(config.mart_table("FACT_ACTIVIDAD"), mode="overwrite")
     print(f"FACT_ACTIVIDAD: {count:,} filas")

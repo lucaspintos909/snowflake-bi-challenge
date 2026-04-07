@@ -1,15 +1,17 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from snowflake.snowpark import Session
+    from utils.config import PipelineConfig
 
 
-def build_dim_geografica(session: Session) -> None:
+def build_dim_geografica(session: Session, config: PipelineConfig) -> None:
     from snowflake.snowpark import functions as F
     from snowflake.snowpark.window import Window
 
-    raw = session.table("RAW.ACTIVIDAD_ESTUDIANTES")
+    raw = session.table(config.raw_table_ref)
     dim = (
         raw
         .select("DEPARTAMENTO", "ZONA")
@@ -22,5 +24,5 @@ def build_dim_geografica(session: Session) -> None:
     dim = dim.with_column("SK_GEOGRAFICA", F.row_number().over(window))
     dim = dim.select("SK_GEOGRAFICA", "DEPARTAMENTO", "ZONA")
     count = dim.count()
-    dim.write.save_as_table("MART.DIM_GEOGRAFICA", mode="overwrite")
+    dim.write.save_as_table(config.mart_table("DIM_GEOGRAFICA"), mode="overwrite")
     print(f"DIM_GEOGRAFICA: {count} filas")

@@ -1,34 +1,28 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from snowflake.snowpark import Session
-
-STAGE_NAME = "RAW_STAGE"
-RAW_TABLE = "CEIBAL_DB.RAW.ACTIVIDAD_ESTUDIANTES"
-DEFAULT_CSV = Path(__file__).parent.parent / "actividad-de-estudiantes-2025.csv"
+    from utils.config import PipelineConfig
 
 
-def load_raw(session: Session, csv_path: Path = DEFAULT_CSV) -> int:
-    session.sql("CREATE SCHEMA IF NOT EXISTS CEIBAL_DB.RAW").collect()
-    session.sql("CREATE SCHEMA IF NOT EXISTS CEIBAL_DB.MART").collect()
-    session.sql(
-        f"CREATE OR REPLACE STAGE CEIBAL_DB.RAW.{STAGE_NAME}"
-    ).collect()
+def load_raw(session: Session, config: PipelineConfig) -> int:
+    session.sql(f"CREATE SCHEMA IF NOT EXISTS {config.database}.{config.raw_schema}").collect()
+    session.sql(f"CREATE SCHEMA IF NOT EXISTS {config.database}.{config.mart_schema}").collect()
+    session.sql(f"CREATE OR REPLACE STAGE {config.stage_fqn}").collect()
 
     put_result = session.file.put(
-        str(csv_path.resolve()),
-        f"@CEIBAL_DB.RAW.{STAGE_NAME}",
+        str(config.csv_path.resolve()),
+        f"@{config.stage_fqn}",
         overwrite=True,
         auto_compress=True,
     )
     print(f"Subida a stage: {[r.status for r in put_result]}")
 
     session.sql(f"""
-        COPY INTO {RAW_TABLE}
-        FROM @CEIBAL_DB.RAW.{STAGE_NAME}
+        COPY INTO {config.raw_table_fqn}
+        FROM @{config.stage_fqn}
         FILE_FORMAT = (
             TYPE = CSV
             FIELD_OPTIONALLY_ENCLOSED_BY = '"'
@@ -39,6 +33,6 @@ def load_raw(session: Session, csv_path: Path = DEFAULT_CSV) -> int:
         PURGE = FALSE
     """).collect()
 
-    count = session.table(RAW_TABLE).count()
-    print(f"Se cargaron {count:,} filas en {RAW_TABLE}")
+    count = session.table(config.raw_table_ref).count()
+    print(f"Se cargaron {count:,} filas en {config.raw_table_fqn}")
     return count
