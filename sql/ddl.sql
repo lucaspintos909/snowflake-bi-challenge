@@ -72,3 +72,51 @@ CREATE OR REPLACE TABLE MART.FACT_ACTIVIDAD (
     FOREIGN KEY (SK_GEOGRAFIA)  REFERENCES MART.DIM_GEOGRAFIA(SK_GEOGRAFIA),
     FOREIGN KEY (SK_CONTEXTO)   REFERENCES MART.DIM_CONTEXTO(SK_CONTEXTO)
 );
+
+-- ─── RAW por año ─────────────────────────────────────────────────────────────
+-- Nota: estas tablas las crea load_raw.py automáticamente.
+-- Este DDL es referencia para inspección manual.
+
+CREATE TABLE IF NOT EXISTS RAW.ACTIVIDAD_ESTUDIANTES_2025 (
+    ID_PERSONA              VARCHAR,
+    SEXO                    VARCHAR,
+    ROL                     VARCHAR,
+    DEPARTAMENTO            VARCHAR,
+    SUBSISTEMA              VARCHAR,
+    CICLO                   VARCHAR,
+    GRADO                   VARCHAR,
+    ZONA                    VARCHAR,
+    CONTEXTO                VARCHAR,
+    ANIO_LECTIVO            VARCHAR,
+    CREA_DIAS_INGRESO       VARCHAR,
+    CREA_ENTREGAS_TAREAS    VARCHAR,
+    CREA_COMENTARIOS        VARCHAR,
+    CREA_ACCIONES_TOTALES   VARCHAR,
+    MATIFIC_DIAS_INGRESO    VARCHAR,
+    MATIFIC_EPISODIOS       VARCHAR,
+    BIBLIOTECA_DIAS_INGRESO VARCHAR,
+    BIBLIOTECA_PRESTAMOS    VARCHAR
+);
+
+CREATE TABLE IF NOT EXISTS RAW.ACTIVIDAD_ESTUDIANTES_2024 (
+    ID_PERSONA              VARCHAR,
+    SEXO                    VARCHAR,
+    ROL                     VARCHAR,
+    DEPARTAMENTO            VARCHAR,
+    SUBSISTEMA              VARCHAR,
+    CICLO                   VARCHAR,
+    GRADO                   VARCHAR,
+    ZONA                    VARCHAR,
+    CONTEXTO                VARCHAR,
+    ANIO_LECTIVO            VARCHAR,
+    CREA_DIAS_INGRESO       VARCHAR,
+    CREA_ENTREGAS_TAREAS    VARCHAR,
+    CREA_COMENTARIOS        VARCHAR,
+    CREA_ACCIONES_TOTALES   VARCHAR,
+    MATIFIC_DIAS_INGRESO    VARCHAR,
+    MATIFIC_EPISODIOS       VARCHAR,
+    PAM_DIAS_INGRESO        VARCHAR,
+    PAM_ACTIVIDADES         VARCHAR,
+    BIBLIOTECA_DIAS_INGRESO VARCHAR,
+    BIBLIOTECA_PRESTAMOS    VARCHAR
+);
