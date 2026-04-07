@@ -2,7 +2,7 @@ import argparse
 from utils.session import get_session
 from ingestion.load_raw import load_raw
 from transform.dim_time import build_dim_tiempo
-from transform.dim_geography import build_dim_geografia
+from transform.dim_geography import build_dim_geografica
 from transform.dim_context import build_dim_contexto
 from transform.dim_student import build_dim_estudiante
 from transform.fact_activity import build_fact_actividad
@@ -16,7 +16,7 @@ def run_ingestion(session) -> None:
 def run_transforms(session) -> None:
     print("\n=== TRANSFORMACIONES ===")
     build_dim_tiempo(session)
-    build_dim_geografia(session)
+    build_dim_geografica(session)
     build_dim_contexto(session)
     build_dim_estudiante(session)
     build_fact_actividad(session)

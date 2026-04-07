@@ -11,7 +11,7 @@ def build_fact_actividad(session: Session) -> None:
     raw = session.table("RAW.ACTIVIDAD_ESTUDIANTES")
     dim_est = session.table("MART.DIM_ESTUDIANTE")
     dim_tiempo = session.table("MART.DIM_TIEMPO")
-    dim_geo = session.table("MART.DIM_GEOGRAFIA")
+    dim_geo = session.table("MART.DIM_GEOGRAFICA")
     dim_ctx = session.table("MART.DIM_CONTEXTO")
 
     staged = raw.select(
@@ -47,7 +47,7 @@ def build_fact_actividad(session: Session) -> None:
             how="left",
         )
         .join(
-            dim_geo.select("SK_GEOGRAFIA", "DEPARTAMENTO", "ZONA"),
+            dim_geo.select("SK_GEOGRAFICA", "DEPARTAMENTO", "ZONA"),
             on=["DEPARTAMENTO", "ZONA"],
             how="left",
         )
@@ -59,7 +59,7 @@ def build_fact_actividad(session: Session) -> None:
         .select(
             "SK_ESTUDIANTE",
             "SK_TIEMPO",
-            "SK_GEOGRAFIA",
+            "SK_GEOGRAFICA",
             "SK_CONTEXTO",
             "CREA_DIAS_INGRESO",
             "CREA_ENTREGAS_TAREAS",

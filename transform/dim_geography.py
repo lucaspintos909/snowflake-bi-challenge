@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from snowflake.snowpark import Session
 
 
-def build_dim_geografia(session: Session) -> None:
+def build_dim_geografica(session: Session) -> None:
     from snowflake.snowpark import functions as F
     from snowflake.snowpark.window import Window
 
@@ -19,8 +19,8 @@ def build_dim_geografia(session: Session) -> None:
         .sort("DEPARTAMENTO", "ZONA")
     )
     window = Window.order_by(F.col("DEPARTAMENTO"), F.col("ZONA"))
-    dim = dim.with_column("SK_GEOGRAFIA", F.row_number().over(window))
-    dim = dim.select("SK_GEOGRAFIA", "DEPARTAMENTO", "ZONA")
+    dim = dim.with_column("SK_GEOGRAFICA", F.row_number().over(window))
+    dim = dim.select("SK_GEOGRAFICA", "DEPARTAMENTO", "ZONA")
     count = dim.count()
-    dim.write.save_as_table("MART.DIM_GEOGRAFIA", mode="overwrite")
-    print(f"DIM_GEOGRAFIA: {count} filas")
+    dim.write.save_as_table("MART.DIM_GEOGRAFICA", mode="overwrite")
+    print(f"DIM_GEOGRAFICA: {count} filas")
