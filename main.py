@@ -1,5 +1,7 @@
 import argparse
+from pathlib import Path
 from utils.session import get_session
+from utils.config import PipelineConfig
 from ingestion.load_raw import load_raw
 from transform.dim_time import build_dim_tiempo
 from transform.dim_geography import build_dim_geografia
@@ -8,23 +10,27 @@ from transform.dim_student import build_dim_estudiante
 from transform.fact_activity import build_fact_actividad
 
 
-def run_ingestion(session) -> None:
-    print("\n=== CARGA DE DATOS ===")
-    load_raw(session)
+def run_ingestion(session, config: PipelineConfig) -> None:
+    print(f"\n=== CARGA DE DATOS ({config.year}) ===")
+    load_raw(session, config)
 
 
-def run_transforms(session) -> None:
-    print("\n=== TRANSFORMACIONES ===")
-    build_dim_tiempo(session)
-    build_dim_geografia(session)
-    build_dim_contexto(session)
-    build_dim_estudiante(session)
-    build_fact_actividad(session)
+def run_transforms(session, config: PipelineConfig) -> None:
+    print(f"\n=== TRANSFORMACIONES ({config.year}) ===")
+    build_dim_tiempo(session, config)
+    build_dim_geografia(session, config)
+    build_dim_contexto(session, config)
+    build_dim_estudiante(session, config)
+    build_fact_actividad(session, config)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Ceibal ELT Pipeline — Snowflake + Snowpark"
+    )
+    parser.add_argument(
+        "--config", required=True, type=Path,
+        help="Ruta al archivo YAML de configuracion (ej. config/2025.yaml)"
     )
     parser.add_argument(
         "--ingest-only", action="store_true", help="Solo corre el paso de ingesta"
@@ -34,15 +40,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    config = PipelineConfig.from_yaml(args.config)
     session = get_session()
     try:
         if args.ingest_only:
-            run_ingestion(session)
+            run_ingestion(session, config)
         elif args.transform_only:
-            run_transforms(session)
+            run_transforms(session, config)
         else:
-            run_ingestion(session)
-            run_transforms(session)
+            run_ingestion(session, config)
+            run_transforms(session, config)
     finally:
         session.close()
 
