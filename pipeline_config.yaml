@@ -1,0 +1,9 @@
+csv:
+  path: actividad-de-estudiantes-2025.csv
+
+snowflake:
+  database: CEIBAL_DB
+  raw_schema: RAW
+  mart_schema: MART
+  stage: RAW_STAGE
+  raw_table: ACTIVIDAD_ESTUDIANTES
