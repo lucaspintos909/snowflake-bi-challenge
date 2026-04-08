@@ -29,6 +29,9 @@ Permite filtrar por cualquier dimensión y agregar métricas en una query simple
 **Por qué una capa RAW?**
 Para dejar el dato original intacto (todo VARCHAR, copia fiel del CSV). Las transformaciones de tipos y limpieza ocurren en Snowpark al construir MART, sin destruir la fuente.
 
+**Por qué no hay una capa STAGING explícita?**
+La limpieza y tipado de datos ocurre inline en Snowpark al construir cada tabla de MART. En lugar de materializar una tabla STAGING en Snowflake, cada función de transformación hace el cast de tipos y normalización directamente sobre RAW. Esto es funcionalmente equivalente a una capa STAGING, pero sin el overhead de una tabla intermedia que habría que mantener sincronizada. Para un dataset estático con estructura conocida, este enfoque es más directo.
+
 ---
 
 ## Setup
