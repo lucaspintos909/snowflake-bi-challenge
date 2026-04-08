@@ -1,6 +1,6 @@
 # snowflake-bi-challenge
 
-ELT pipeline — Evaluación técnica BI Analista desarrollador, Ceibal (Uruguay).
+ELT pipeline — Evaluación técnica BI, Ceibal (Uruguay).
 
 Ingesta el dataset público de actividad de estudiantes en plataformas educativas (CREA, Matific, Biblioteca País) y lo transforma en un star schema en Snowflake usando Python y Snowpark.
 
