@@ -12,6 +12,32 @@ def load_raw(session: Session, config: PipelineConfig) -> int:
     session.sql(f"CREATE SCHEMA IF NOT EXISTS {config.database}.{config.raw_schema}").collect()
     session.sql(f"CREATE SCHEMA IF NOT EXISTS {config.database}.{config.mart_schema}").collect()
 
+    # Crear la tabla RAW si no existe. Todas las columnas son VARCHAR:
+    # el CSV se carga tal cual, sin conversión de tipos. Los tipos correctos
+    # se aplican en las transformaciones de MART.
+    session.sql(f"""
+        CREATE TABLE IF NOT EXISTS {config.raw_table_fqn} (
+            ID_PERSONA              VARCHAR,
+            SEXO                    VARCHAR,
+            ROL                     VARCHAR,
+            DEPARTAMENTO            VARCHAR,
+            SUBSISTEMA              VARCHAR,
+            CICLO                   VARCHAR,
+            GRADO                   VARCHAR,
+            ZONA                    VARCHAR,
+            CONTEXTO                VARCHAR,
+            ANIO_LECTIVO            VARCHAR,
+            CREA_DIAS_INGRESO       VARCHAR,
+            CREA_ENTREGAS_TAREAS    VARCHAR,
+            CREA_COMENTARIOS        VARCHAR,
+            CREA_ACCIONES_TOTALES   VARCHAR,
+            MATIFIC_DIAS_INGRESO    VARCHAR,
+            MATIFIC_EPISODIOS       VARCHAR,
+            BIBLIOTECA_DIAS_INGRESO VARCHAR,
+            BIBLIOTECA_PRESTAMOS    VARCHAR
+        )
+    """).collect()
+
     # Stage interno de Snowflake usado como área de transferencia para el CSV
     session.sql(f"CREATE OR REPLACE STAGE {config.stage_fqn}").collect()
 
