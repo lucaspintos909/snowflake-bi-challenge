@@ -11,8 +11,6 @@ def get_connection_params() -> dict:
         "password": os.environ["SNOWFLAKE_PASSWORD"],
         "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
         "role": os.environ["SNOWFLAKE_ROLE"],
-        "database": "CEIBAL_DB",
-        "schema": "RAW",
     }
 
 
