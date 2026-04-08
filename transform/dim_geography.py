@@ -12,6 +12,9 @@ def build_dim_geografica(session: Session, config: PipelineConfig) -> None:
     from snowflake.snowpark.window import Window
 
     raw = session.table(config.raw_table_ref)
+
+    # ZONA y DEPARTAMENTO solo aplican a DGEIP; el resto del dataset trae "Sin Datos"
+    # (plural) en lugar del valor "Sin Dato", normalizo para tener consistencia.
     dim = (
         raw
         .select("DEPARTAMENTO", "ZONA")
@@ -20,9 +23,12 @@ def build_dim_geografica(session: Session, config: PipelineConfig) -> None:
         .distinct()
         .sort("DEPARTAMENTO", "ZONA")
     )
+
+    # Surrogate key secuencial ordenada por departamento y zona
     window = Window.order_by(F.col("DEPARTAMENTO"), F.col("ZONA"))
     dim = dim.with_column("SK_GEOGRAFICA", F.row_number().over(window))
     dim = dim.select("SK_GEOGRAFICA", "DEPARTAMENTO", "ZONA")
+
     count = dim.count()
     dim.write.save_as_table(config.mart_table("DIM_GEOGRAFICA"), mode="overwrite")
     print(f"DIM_GEOGRAFICA: {count} filas")

@@ -16,6 +16,9 @@ def build_fact_actividad(session: Session, config: PipelineConfig) -> None:
     dim_geo = session.table(config.mart_table("DIM_GEOGRAFICA"))
     dim_ctx = session.table(config.mart_table("DIM_CONTEXTO"))
 
+    # Castear columnas numéricas desde VARCHAR (RAW llega todo como texto).
+    # Las métricas de plataforma pueden ser NULL: celdas vacías indican que
+    # la plataforma no aplica para ese subsistema/grado, no que el valor sea cero.
     staged = raw.select(
         "ID_PERSONA",
         "SEXO",
@@ -36,6 +39,9 @@ def build_fact_actividad(session: Session, config: PipelineConfig) -> None:
         F.col("BIBLIOTECA_PRESTAMOS").cast("FLOAT").alias("BIBLIOTECA_PRESTAMOS"),
     )
 
+    # Resulvo surrogate keys haciendo LEFT JOIN contra cada dimensión.
+    # LEFT JOIN para no perder filas si algún valor dimensional no tiene match
+    # (debería ser raro dado que las dims se construyen del mismo RAW, pero es más seguro).
     fact = (
         staged
         .join(
