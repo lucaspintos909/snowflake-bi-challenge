@@ -30,6 +30,6 @@ def build_dim_contexto(session: Session, config: PipelineConfig) -> None:
     dim = dim.with_column("SK_CONTEXTO", F.row_number().over(window))
     dim = dim.select("SK_CONTEXTO", "SUBSISTEMA", "CICLO", "GRADO", "CONTEXTO")
 
-    count = dim.count()
     dim.write.save_as_table(config.mart_table("DIM_CONTEXTO"), mode="overwrite")
+    count = session.table(config.mart_table("DIM_CONTEXTO")).count()
     print(f"DIM_CONTEXTO: {count} filas")

@@ -27,6 +27,6 @@ def build_dim_estudiante(session: Session, config: PipelineConfig) -> None:
     dim = dim.with_column("SK_ESTUDIANTE", F.row_number().over(window))
     dim = dim.select("SK_ESTUDIANTE", "ID_PERSONA", "SEXO")
 
-    count = dim.count()
     dim.write.save_as_table(config.mart_table("DIM_ESTUDIANTE"), mode="overwrite")
+    count = session.table(config.mart_table("DIM_ESTUDIANTE")).count()
     print(f"DIM_ESTUDIANTE: {count} filas")

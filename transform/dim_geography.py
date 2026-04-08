@@ -29,6 +29,6 @@ def build_dim_geografica(session: Session, config: PipelineConfig) -> None:
     dim = dim.with_column("SK_GEOGRAFICA", F.row_number().over(window))
     dim = dim.select("SK_GEOGRAFICA", "DEPARTAMENTO", "ZONA")
 
-    count = dim.count()
     dim.write.save_as_table(config.mart_table("DIM_GEOGRAFICA"), mode="overwrite")
+    count = session.table(config.mart_table("DIM_GEOGRAFICA")).count()
     print(f"DIM_GEOGRAFICA: {count} filas")

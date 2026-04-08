@@ -26,6 +26,6 @@ def build_dim_tiempo(session: Session, config: PipelineConfig) -> None:
     dim = dim.with_column("SK_TIEMPO", F.row_number().over(window))
     dim = dim.select("SK_TIEMPO", "ANIO_LECTIVO")
 
-    count = dim.count()
     dim.write.save_as_table(config.mart_table("DIM_TIEMPO"), mode="overwrite")
+    count = session.table(config.mart_table("DIM_TIEMPO")).count()
     print(f"DIM_TIEMPO: {count} filas")

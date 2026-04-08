@@ -80,6 +80,6 @@ def build_fact_actividad(session: Session, config: PipelineConfig) -> None:
         )
     )
 
-    count = fact.count()
     fact.write.save_as_table(config.mart_table("FACT_ACTIVIDAD"), mode="overwrite")
+    count = session.table(config.mart_table("FACT_ACTIVIDAD")).count()
     print(f"FACT_ACTIVIDAD: {count:,} filas")
