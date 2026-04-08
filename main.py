@@ -41,6 +41,7 @@ def main() -> None:
 
     config = PipelineConfig.from_yaml(CONFIG_PATH)
     session = get_session()
+    session.sql(f"USE DATABASE {config.database}").collect()
     try:
         if args.ingest_only:
             run_ingestion(session, config)
